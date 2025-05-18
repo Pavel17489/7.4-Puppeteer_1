@@ -1,3 +1,5 @@
+const { TimeoutError } = require("puppeteer");
+
 let page;
 
 beforeEach(async () => {
@@ -61,11 +63,14 @@ describe("Github new 3 tests", () => {
     expect(actual).toContain(expected);
   }, 4000);
 
-  test("The page GH Home contains open source", async () => {
+  test("The h1 preview in page startups", async () => {
     await page.goto("https://github.com/home");
-    const element = "li:nth-child(4) button:nth-child(1)";
-    const actual = await page.$eval(element, link => link.textContent);
-    const expected = "Open Source";
-    expect(actual).toContain(expected);
-  }, 4000);
+    await page.evaluate(() => {
+    document.querySelector(".HeaderMenu-dropdown-link[href='https://github.com/enterprise/startups']").click();
+    });
+    await page.waitForSelector('h1');      
+    const extractedText = await page.$eval("div h1.col-10-max.color-fg-default.mx-auto.h1-mktg", (el) => el.textContent);    
+    const expected = "Scale your startup"+"on GitHub";
+    expect(extractedText).toContain(expected);
+  }, 20000);
 });
